@@ -5,6 +5,17 @@
 #include "GameFramework/Pawn.h"
 #include "CubePawn.generated.h"
 
+/** Denotes a rotation direction (either clockwise or counter-clockwise) */
+UENUM(BlueprintType)
+namespace ERotationDirection
+{
+	enum Type
+	{
+		Clockwise,
+		CounterClockwise
+	};
+}
+
 UCLASS()
 class CUBEPROJECT_API ACubePawn : public APawn
 {
@@ -31,12 +42,20 @@ public:
 	/** Moves the pawn horizontally based on the strength of the axis input. */
 	void MoveX(float AxisValue);
 
-	/** Called when the presses the spin button. */
-	void StartSpin();
+	/** Called when the user releases the spin button. */
+	void OnReleaseActionButton();
 
-	/** Spins the actor 'RotationCount' times in 'Duration' seconds. This is implemented in Blueprint. */
+	/** Adds a force to the pawn, making him move faster in his current movement direction. */
+	void AddThrust();
+
+	/** 
+	 * Spins the actor 'RotationCount' times in 'Duration' seconds. This is implemented in Blueprint. 
+	 * @param RotationCount The amount of times the pawn spins 360 degrees
+	 * @param Duration The amount of time it takes for the pawn to perform the spin
+	 * @param SpinDirection The direction of the spin (clockwise or counter-clockwise)
+	 */
 	UFUNCTION(BlueprintImplementableEvent)
-	void Spin(int32 RotationCount, float Duration);
+	void Spin(int32 RotationCount, float Duration, ERotationDirection::Type SpinDirection);
 
 	/** Stores the static mesh used to display the cube. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Pawn)
@@ -48,5 +67,9 @@ public:
 	/** The default amount of time it takes an actor to spin 360 degrees. */
 	UPROPERTY(EditAnywhere, Category=Spin)
 	float BaseSpinDuration;
+
+	/** The default amount of force applied to the pawn when a spin is performed. */
+	UPROPERTY(EditAnywhere, Category=Spin)
+	float BaseThrustForce;
 
 };

@@ -9,8 +9,9 @@ ACubePawn::ACubePawn()
 	// Call the pawn's Tick() function every frame
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Set the default amount of time it takes the actor to spin 360 degrees
-	BaseSpinDuration = 1.0f;
+	// Set the default values for the pawn's spin
+	BaseSpinDuration = 0.4f;
+	BaseThrustForce = 1000.0f;
 
 	// Create the main sphere collider for the cube's collision detection
 	USphereComponent* BaseCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
@@ -30,38 +31,33 @@ ACubePawn::ACubePawn()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
-// Called when the game starts or when spawned
 void ACubePawn::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-// Called every frame
 void ACubePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind input to functionality
 void ACubePawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	Super::SetupPlayerInputComponent(InputComponent);
 
 	// Bind the button input to the correct member functions.
-	InputComponent->BindAction("Spin", IE_Released, this, &ACubePawn::StartSpin);
+	InputComponent->BindAction("Spin", IE_Released, this, &ACubePawn::OnReleaseActionButton);
 
 	// Bind the axis input to the correct member functions.
 	InputComponent->BindAxis("MoveY", this, &ACubePawn::MoveY);
 	InputComponent->BindAxis("MoveX", this, &ACubePawn::MoveX);
 }
 
-/** Returns the custom movement component used by this pawn. */
 UPawnMovementComponent* ACubePawn::GetMovementComponent() const
 {
 	return PawnMovementComponent;
 }
 
-/** Moves the pawn vertically based on the axis input. */
 void ACubePawn::MoveY(float AxisValue)
 {
 	// If the pawn's movement component exists and is updated by the root
@@ -72,7 +68,6 @@ void ACubePawn::MoveY(float AxisValue)
 	}
 }
 
-/** Moves the pawn horizontally based on the strength of the axis input. */
 void ACubePawn::MoveX(float AxisValue)
 {
 	// If the pawn's movement component exists and is being updated by the root component
@@ -83,9 +78,33 @@ void ACubePawn::MoveX(float AxisValue)
 	}
 }
 
-/** Called when the spinning button is released. */
-void ACubePawn::StartSpin()
+void ACubePawn::OnReleaseActionButton()
 {
+	// Stores the direction the pawn will spin.
+	ERotationDirection::Type SpinDirection = ERotationDirection::Clockwise;
+
+	// Get the current direction in which the user is pressing
+	FVector CurrentInputDirection = PawnMovementComponent->GetLastInputVector();
+
+	// If the pawn is moving to the left, make him spin counter-clockwise
+	if (CurrentInputDirection.Y < 0)
+		SpinDirection = ERotationDirection::CounterClockwise;
+
 	// Tell the Blueprint to spin the actor.
-	Spin(1, BaseSpinDuration);
+	Spin(1, BaseSpinDuration, SpinDirection);
+
+	// Apply a thrust to the pawn, making him move faster in his current direction of movement
+	AddThrust();
+}
+
+void ACubePawn::AddThrust()
+{
+	// Compute the direction the user is making the pawn move
+	FVector CurrentInputDirection = PawnMovementComponent->GetLastInputVector().GetSafeNormal2D();
+
+	// Compute the force to apply on the pawn
+	FVector ThrustForce = CurrentInputDirection * BaseThrustForce;
+
+	// Add the desired force to the pawn's current velocity
+	PawnMovementComponent->Velocity = PawnMovementComponent->Velocity + ThrustForce;
 }

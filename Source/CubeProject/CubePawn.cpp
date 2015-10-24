@@ -67,8 +67,8 @@ void ACubePawn::MoveY(float AxisValue)
 	// If the pawn's movement component exists and is updated by the root
 	if (PawnMovementComponent && (PawnMovementComponent->UpdatedComponent == RootComponent))
 	{
-		// Add the actor's up vector, times the axis value to the movement component's input vector
-		PawnMovementComponent->AddInputVector(GetActorUpVector() * AxisValue);
+		// Add an acceleration vector pointing up at the magnitude of the input axis 
+		PawnMovementComponent->AddInputVector(FVector::UpVector * AxisValue);
 	}
 }
 
@@ -78,8 +78,8 @@ void ACubePawn::MoveX(float AxisValue)
 	// If the pawn's movement component exists and is being updated by the root component
 	if (PawnMovementComponent && (PawnMovementComponent->UpdatedComponent == RootComponent))
 	{
-		// Add an input vector to the movement component, going in the direction of the actor's "right" vector, with magnitude 'AxisValue'
-		PawnMovementComponent->AddInputVector(GetActorRightVector() * AxisValue);
+		// Add an input vector to the movement component, facing right, with magnitude 'AxisValue'
+		PawnMovementComponent->AddInputVector(FVector::RightVector * AxisValue);
 	}
 }
 

@@ -57,6 +57,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void Spin(int32 RotationCount, float Duration, ERotationDirection::Type SpinDirection);
 
+	/** Stores the collider component that controls the pawn's physics. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Pawn)
+	class USphereComponent* BaseCollisionComponent;
 	/** Stores the static mesh used to display the cube. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Pawn)
 	class UStaticMeshComponent* CubeMesh;
@@ -71,5 +74,14 @@ public:
 	/** The default amount of force applied to the pawn when a spin is performed. */
 	UPROPERTY(EditAnywhere, Category=Spin)
 	float BaseThrustForce;
+
+private:
+	/** If true, the pawn is currently spinning. The pawn can't spin again until it is done spinning. */
+	bool bSpinning;
+
+	/** The amount of time the pawn has been spinning. */
+	float SpinTime;
+	/** The amount of time to wait between two successive spins. */
+	float SpinCooldown;
 
 };

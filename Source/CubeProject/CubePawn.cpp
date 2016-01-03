@@ -18,6 +18,7 @@ ACubePawn::ACubePawn()
 	RootComponent = BaseCollisionComponent;
 	BaseCollisionComponent->InitSphereRadius(40.0f);
 	BaseCollisionComponent->SetCollisionProfileName(TEXT("PAWN"));
+	BaseCollisionComponent->SetNotifyRigidBodyCollision(true);
 
 	// Create the static mesh used to visualize the cube
 	CubeMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeMesh"));

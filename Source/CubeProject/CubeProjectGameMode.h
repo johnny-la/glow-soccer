@@ -19,6 +19,11 @@ public:
     UFUNCTION()
     void OnBallOverlap(AActor* OtherActor);
     
+    /** Called when a player scores and the game restarts. This method displays the "READY, GO!!" message on screen. 
+      * Note: This method is called from ACubeProjectGameMode::Tick() when the game is in "RESET" state. */
+    UFUNCTION(BlueprintImplementableEvent)
+    void ShowGameStartTimer();
+    
     /** Gives the ball a small push to start the game. Called from ACubeProjectGameState::Tick() when in PUSH_BALL state. */
     void PushBall();
     

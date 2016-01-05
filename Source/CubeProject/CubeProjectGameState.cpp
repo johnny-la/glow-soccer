@@ -38,6 +38,9 @@ void ACubeProjectGameState::Tick(float DeltaTime)
                 GameMode->SetPlayerInputEnabled(false);
                 // Start a timer which will call OnGameStart once complete. Once this method is called, game state is switched to "PUSH_BALL"
                 World->GetTimerManager().SetTimer(GameStartTimerHandle,this,&ACubeProjectGameState::OnGameStart,GAME_START_TIMER_DURATION,false);
+                // Tell the level Blueprint to display the "READY, GO!!" message.
+                GameMode->ShowGameStartTimer();
+                // Wait until the timer elapses before starting the game 
                 CurrentState = EGameState::WAITING_TO_START;
                 break;
             }

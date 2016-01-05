@@ -201,5 +201,6 @@ void ACubePawn::Reset()
     CubeMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
     // Reset the input vector to zero so that the pawn doesn't move due to input.
     PawnMovementComponent->ConsumeInputVector();
+    PawnMovementComponent->StopMovementImmediately();
     
 }

@@ -11,6 +11,9 @@
 /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
 const FVector ACubeProjectGameMode::SCORE_TEXT_POSITION = FVector(0.0f,100.0f,252.0f);
 
+/** The default score needed for a player to win the game. */
+const int32 ACubeProjectGameMode::DEFAULT_SCORE_TO_WIN = 1;
+
 // Initializes the default properties for the game mode
 ACubeProjectGameMode::ACubeProjectGameMode()
 {
@@ -46,6 +49,9 @@ ACubeProjectGameMode::ACubeProjectGameMode()
     DefaultPawnClass = Player1PawnClass;
     // Set the default class used to control game state
     GameStateClass = ACubeProjectGameState::StaticClass();
+    
+    // Set the score to win to default
+    ScoreToWin = DEFAULT_SCORE_TO_WIN;
 
     // Spawn a spectator pawn initially. The actual player pawns are spawned manually in BeginPlay()
     //DefaultPawnClass = SpectatorClass;
@@ -140,18 +146,18 @@ void ACubeProjectGameMode::OnBallOverlap(AActor* OtherActor)
             // Cast the actor into a Goal
             AGoal* Goal = Cast<AGoal>(OtherActor);
             
-            // Stores true if the player on the right-hand side scored (player 2)
-            bool bRightPlayerScored = false;
+            // Store true if the player on the right-hand side scored (player 2)
+            bRightPlayerScoredLast = false;
             
             // If the goal does not belong to the right-hand side of the field, the ball ended up in the left player's goal. Thus, the right player scored.
             if(!Goal->IsRightHandSideGoal())
             {
                 // The ball just enterred the left-hand side goal. Thus, the right player scored
-                bRightPlayerScored = true;
+                bRightPlayerScoredLast = true;
             }
             
             // Inform the game that one of the players scored. This will update the HUD and reset the match.
-            OnGoal(bRightPlayerScored);
+            OnGoal(bRightPlayerScoredLast);
         }
     }
 }
@@ -184,18 +190,29 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
     // Retrieve the GameState instance controlling the game's state.
     ACubeProjectGameState* CurrentGameState = GetGameState<ACubeProjectGameState>();
     
-    // Change the game state to RESET. This resets the ball and the players at their starting points.
+    
     if(CurrentGameState)
     {
-        GameState->SetState(EGameState::RESET);
+        // If either player reached the score needed to win
+        if(LeftPlayerScore >= ScoreToWin || RightPlayerScore >= ScoreToWin)
+        {
+            // Inform the GameState instance that the game is over.
+            GameState->SetState(EGameState::GAME_OVER);
+        }
+        // Else, if the game still isn't over, reset the ball and the players to their start positions.
+        else
+        {
+            // Change the game state to RESET. This resets the ball and the players at their starting points.
+            GameState->SetState(EGameState::RESET);
+        }
     }
         
 }
 
-void ACubeProjectGameMode::PushBall()
+void ACubeProjectGameMode::PushBall(const bool bMoveRight)
 {
     // Give the ball an initial push to get the game started.
-    Ball->StartMove();
+    Ball->StartMove(bMoveRight);
 }
 
 void ACubeProjectGameMode::ResetField()
@@ -216,6 +233,12 @@ void ACubeProjectGameMode::SetPlayerInputEnabled(bool bEnabled)
     UGameplayStatics::GetPlayerController(World,1)->SetIgnoreMoveInput(!bEnabled);
 }
 
+ABall* ACubeProjectGameMode::GetBall()
+{
+    // Return the ball currently on the field.
+    return Ball;
+}
+
 /** Returns the score kept by the left-hand side player. */
 int32 ACubeProjectGameMode::GetLeftPlayerScore() const
 {
@@ -226,4 +249,9 @@ int32 ACubeProjectGameMode::GetLeftPlayerScore() const
 int32 ACubeProjectGameMode::GetRightPlayerScore() const
 {
     return RightPlayerScore;
+}
+
+bool ACubeProjectGameMode::DidRightPlayerScoreLast() const
+{
+    return bRightPlayerScoredLast;
 }

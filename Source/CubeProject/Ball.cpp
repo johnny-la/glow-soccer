@@ -41,8 +41,6 @@ ABall::ABall()
 void ABall::BeginPlay()
 {
 	Super::BeginPlay();
-
-	StartMove();
 }
 
 // Called every frame
@@ -63,10 +61,26 @@ void ABall::Tick(float DeltaSeconds)
 }
 
 /** Gives the ball an initial jolt when spawned. */
-void ABall::StartMove()
+void ABall::StartMove(const bool bMoveRight)
 {
+    // Stores the x-direction the ball will move in (this is the horizontal component of the ball's normalized velocity)
+    float DirectionX = 0.0f;
+    
+    // If the ball should move right
+    if(bMoveRight)
+    {
+        // Choose a random positive direction (to move right)
+        DirectionX = FMath::FRandRange(0.0,1.0f);
+    }
+    else
+    {
+        // Choose a random negative direction (to move left)
+        DirectionX = FMath::FRandRange(-1.0f,0.0f);
+    }
+    
 	// Set the ball's initial velocity
-	Direction = FVector(0.0f, 0.5f, 0.5f);
+    Direction = FVector(0.0f, DirectionX, FMath::FRandRange(-0.5f,0.5f)); // Choose a random starting direction
+    Direction.Normalize();
 	Speed = DefaultSpeed;
 
 	// Apply the new speed and direction to the ball's physics velocity

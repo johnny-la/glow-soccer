@@ -1,9 +1,11 @@
 #include "CubeProject.h"
 #include "CubeProjectGameState.h"
 #include "CubeProjectGameMode.h"
+#include "CubeProjectLevelScriptActor.h"
+#include "Ball.h"
 
 /** The amount of time it takes for the game to restart after a goal */
-const float ACubeProjectGameState::GAME_START_TIMER_DURATION = 2.0f;
+const float ACubeProjectGameState::GAME_START_TIMER_DURATION = 1.0f;
 
 ACubeProjectGameState::ACubeProjectGameState()
 {
@@ -11,7 +13,7 @@ ACubeProjectGameState::ACubeProjectGameState()
     PrimaryActorTick.bCanEverTick = true;
     
     // The game always starts in 'Waiting' mode
-    CurrentState = EGameState::WAITING_TO_START;
+    CurrentState = EGameState::RESET;
 }
 
 void ACubeProjectGameState::Tick(float DeltaTime)
@@ -20,6 +22,9 @@ void ACubeProjectGameState::Tick(float DeltaTime)
     
     // Get the World instance controlling the game
     UWorld* World = GetWorld();
+    
+    // Obtain the level blueprint. We call its methods to display Matinee animations such as "READY, GO!!"
+    ACubeProjectLevelScriptActor* LevelBlueprint = Cast<ACubeProjectLevelScriptActor>(World->GetLevelScriptActor());
     
     // Get the game mode controlling the rules of the game. This is used to reset the board and make appropriate changes to the game
     ACubeProjectGameMode* GameMode = (ACubeProjectGameMode*)World->GetAuthGameMode();
@@ -38,8 +43,9 @@ void ACubeProjectGameState::Tick(float DeltaTime)
                 GameMode->SetPlayerInputEnabled(false);
                 // Start a timer which will call OnGameStart once complete. Once this method is called, game state is switched to "PUSH_BALL"
                 World->GetTimerManager().SetTimer(GameStartTimerHandle,this,&ACubeProjectGameState::OnGameStart,GAME_START_TIMER_DURATION,false);
-                // Tell the level Blueprint to display the "READY, GO!!" message.
-                GameMode->ShowGameStartTimer();
+                if(LevelBlueprint)
+                    // Tell the level Blueprint to display the "READY, GO!!" message.
+                    LevelBlueprint->ShowGameStartTimer();
                 // Wait until the timer elapses before starting the game 
                 CurrentState = EGameState::WAITING_TO_START;
                 break;
@@ -53,8 +59,8 @@ void ACubeProjectGameState::Tick(float DeltaTime)
             {
                 // Enable player input since the game has started.
                 GameMode->SetPlayerInputEnabled(true);
-                // Gives the ball an initial push to get the game started.
-                GameMode->PushBall();
+                // Gives the ball an initial push to get the game started. If the right-most player scored last, shoot the ball to the left
+                GameMode->PushBall(!GameMode->DidRightPlayerScoreLast());
                 CurrentState = EGameState::PLAYING;
                 break;
             }
@@ -62,9 +68,16 @@ void ACubeProjectGameState::Tick(float DeltaTime)
             {
                 break;
             }
-            case EGameState::UPDATE_SCORE:
+            case EGameState::GAME_OVER:
             {
-                CurrentState = EGameState::WAITING_TO_START;
+                if(LevelBlueprint)
+                    // Tell the level blueprint to display the "WIN" message for the player that won. If the right player scored last,
+                    // the yellow player won the game. Thus, pass in true so that "Yellow Player Wins" is displayed.
+                    LevelBlueprint->ShowWinMessage(GameMode->DidRightPlayerScoreLast());
+                
+                // Disable player input
+                GameMode->SetPlayerInputEnabled(false);
+                GameMode->GetBall()->Destroy();
                 break;
             }
                 

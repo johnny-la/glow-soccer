@@ -25,8 +25,8 @@ public:
 	/** Called when another actor begins to touch the ball. */
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
-	/** Called when the ball spawns. Gives the ball an initial push. */
-	void StartMove();
+	/** Called when the ball spawns. Gives the ball an initial push. If bMoveRight is true, the ball is launched to the right of the field. */
+	void StartMove(const bool bMoveRight);
     
     /** Resets the ball to its starting position (0,0) */
     void Reset();

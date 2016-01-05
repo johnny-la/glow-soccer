@@ -12,7 +12,7 @@ namespace EGameState
         WAITING_TO_START,
         PUSH_BALL,
         PLAYING,
-        UPDATE_SCORE
+        GAME_OVER
     };
 }
 

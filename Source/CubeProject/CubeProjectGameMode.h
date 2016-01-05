@@ -19,13 +19,10 @@ public:
     UFUNCTION()
     void OnBallOverlap(AActor* OtherActor);
     
-    /** Called when a player scores and the game restarts. This method displays the "READY, GO!!" message on screen. 
-      * Note: This method is called from ACubeProjectGameMode::Tick() when the game is in "RESET" state. */
-    UFUNCTION(BlueprintImplementableEvent)
-    void ShowGameStartTimer();
-    
-    /** Gives the ball a small push to start the game. Called from ACubeProjectGameState::Tick() when in PUSH_BALL state. */
-    void PushBall();
+    /** Gives the ball a small push to start the game. Called from ACubeProjectGameState::Tick() when in PUSH_BALL state. 
+      * @param bMoveRight If true, the ball is pushed to the right. Otherwise, it is pushed to the left
+      */
+    void PushBall(const bool bMoveRight);
     
     /** Called when a player scores. Resets the players and the ball at their default locations. Called from ACubeProjectGameState::Tick(). */
     void ResetField();
@@ -39,8 +36,19 @@ public:
     /** Returns the score obtained by the player which starts on the right-hand side of the field. */
     int32 GetRightPlayerScore() const;
     
+    /** Returns the ball currently on the field. */
+    class ABall* GetBall();
+    
+    /** If true, the right player won last. i.e., the player starting on the right of the field scored the last goal.
+     * Used in ACubeProjectGameState::Tick() to determine whether the ball should be launched to the left or right
+     * when the game starts. */
+    bool DidRightPlayerScoreLast() const;
+    
     /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
     static const FVector SCORE_TEXT_POSITION;
+    
+    /** The default score needed to win the game. */
+    static const int32 DEFAULT_SCORE_TO_WIN;
 
 private:
     /** Called when the ball enters one of the goals and one of the players score. 
@@ -74,4 +82,10 @@ private:
     int32 LeftPlayerScore;
     /** The score for the player on the right. */
     int32 RightPlayerScore;
+    
+    /** The score a player needs to win the game. */
+    int32 ScoreToWin;
+    
+    /** True if the right player won last (i.e., the player starting on the right of the field scored the last goal). */
+    bool bRightPlayerScoredLast = true;
 };

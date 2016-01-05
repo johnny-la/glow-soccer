@@ -47,6 +47,12 @@ public:
 
 	/** Adds a force to the pawn, making him move faster in his current movement direction. */
 	void AddThrust();
+    
+    /** Called when a player scores. Resets the pawn at its starting position. */
+    void Reset();
+    
+    /** Sets the pawn controlled by player 2. Since only one pawn can be possessed by a keyboard, one pawn must control the other manually. */
+    FORCEINLINE void SetPawn_P2(ACubePawn* Pawn_P2) { this->Pawn_P2 = Pawn_P2; }
 
 	/** 
 	 * Spins the actor 'RotationCount' times in 'Duration' seconds. This is implemented in Blueprint. 
@@ -76,6 +82,22 @@ public:
 	float BaseThrustForce;
 
 private:
+    /** Moves the second player 'Pawn_P2' in the y-direction. We do this because only a single pawn can receive keyboard input. Thus,
+      * this pawn is responsible for moving the second one too. */
+    void MoveY_P2(float AxisValue);
+    /** Moves the second player 'Pawn_P2' in the y-direction. We do this because only a single pawn can receive keyboard input. Thus,
+      * this pawn is responsible for moving the second one too. */
+    void MoveX_P2(float AxisValue);
+    /** Called when the second player releases his action button. We need this method because only a single pawn can receive
+      * keyboard input. Hence, this pawn class is responsible for moving the second one too. */
+    void OnReleaseActionButton_P2();
+    
+    /** The pawn possessed by the second player. Since only one pawn can be possessed by a keyboard, one pawn must control the other manually. */
+    ACubePawn* Pawn_P2;
+    
+    /** The position at which the pawn was first spawned. This is where the pawn will be respawned after a goal. */
+    FVector StartPosition;
+    
 	/** If true, the pawn is currently spinning. The pawn can't spin again until it is done spinning. */
 	bool bSpinning;
 

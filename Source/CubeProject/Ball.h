@@ -27,12 +27,18 @@ public:
 
 	/** Called when the ball spawns. Gives the ball an initial push. */
 	void StartMove();
+    
+    /** Resets the ball to its starting position (0,0) */
+    void Reset();
 
 	/** The amount of time that must pass for the same player to hit the ball twice. If the player could hit the ball multiple times in
 	  * in a short time frame, the physics would be glitchy. */
 	static const float MULTIPLE_HIT_COOLDOWN;
 
 private:
+	/** Updates the ball's velocity based on the 'Speed' and 'Direction' variables. */
+	void UpdateVelocity();
+
 	/** Static mesh used to display the ball. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* BallMesh;
@@ -41,6 +47,9 @@ private:
 	UPROPERTY(EditAnywhere, Category=BallPhysics)
 	float DefaultSpeed = 300.0f;
 
+	/** The ball's minimum speed. */
+	UPROPERTY(EditAnywhere, Category = BallPhysics)
+	float MinSpeed = 300.0f;
 	/** The ball's maximum speed. */
 	UPROPERTY(EditAnywhere, Category = BallPhysics)
 	float MaxSpeed = 600.0f;

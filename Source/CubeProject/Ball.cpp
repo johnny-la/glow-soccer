@@ -4,7 +4,7 @@
 #include "Ball.h"
 
 // The amount of time which must elapse for the same actor to hit the ball twice
-const float ABall::MULTIPLE_HIT_COOLDOWN = 0.1f;
+const float ABall::MULTIPLE_HIT_COOLDOWN = 1.0f;
 
 // Sets the ball's default properties
 ABall::ABall()
@@ -33,9 +33,8 @@ ABall::ABall()
 	// Call the NotifyActorBeginOverlap() method when an actor hits the ball.
 	OnActorBeginOverlap.AddDynamic(this, &ABall::NotifyActorBeginOverlap);
 
-	// Set the speed and direction of the ball to zero
-	Direction = FVector(0.0f, 0.0f, 0.0f);
-	Speed = 0.0f;
+    // Reset the ball at its starting position with zero velocity.
+    Reset();
 }
 
 // Called when the ball is spawned
@@ -61,14 +60,6 @@ void ABall::Tick(float DeltaSeconds)
 	// Update the ball's transform so that its position is updated
 	BallMesh->SetRelativeTransform(Transform);*/
 
-	// Compute the ball's current velocity
-	FVector BallVelocity = Direction * Speed;
-
-	// Clamp the ball's maximum speed
-	BallVelocity = BallVelocity.GetClampedToMaxSize(MaxSpeed);
-
-	// Update the ball's linear velocity based on the vector computed above.
-	BallMesh->SetPhysicsLinearVelocity(BallVelocity);
 }
 
 /** Gives the ball an initial jolt when spawned. */
@@ -77,6 +68,34 @@ void ABall::StartMove()
 	// Set the ball's initial velocity
 	Direction = FVector(0.0f, 0.5f, 0.5f);
 	Speed = DefaultSpeed;
+
+	// Apply the new speed and direction to the ball's physics velocity
+	UpdateVelocity();
+}
+
+/** Resets the ball at its starting position (0,0) */
+void ABall::Reset()
+{
+    // Reset the ball at (0,0), its starting point.
+    SetActorLocation(FVector::ZeroVector);
+    
+    // Set the speed and direction of the ball to zero
+    BallMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
+    Direction = FVector(0.0f, 0.0f, 0.0f);
+    Speed = 0.0f;
+}
+
+/** Update the ball's velocity to match the 'Speed' and 'Direction' variables. */
+void ABall::UpdateVelocity()
+{
+	// Compute the ball's current velocity
+	FVector BallVelocity = Direction * Speed;
+
+	// Clamp the ball's maximum speed
+	BallVelocity = BallVelocity.GetClampedToSize(MinSpeed, MaxSpeed);
+
+	// Update the ball's linear velocity based on the vector computed above.
+	BallMesh->SetPhysicsLinearVelocity(BallVelocity);
 }
 
 /** Called when the ball is hit by another actor. */
@@ -84,40 +103,89 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
 	bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Set the ball's velocity to zero. The ball's movement and velocity is controlled manually in the Tick() method.
-	/*BallMesh->SetAllPhysicsLinearVelocity(FVector(0, 0, 0));*/
+	//BallMesh->SetAllPhysicsLinearVelocity(FVector(0, 0, 0));
 
-	// Stores true if the same actor did not hit the ball twice 
-	const bool bDifferentActorHitBall = (LastActorHit != Other);
-	// Stores true if enough time has been passed for the same actor to hit the ball twice
-	const bool bCooldownElapsed = (GetWorld()->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
-
-	// If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
-	if (bDifferentActorHitBall || bCooldownElapsed)
+	// If a cube pawn hit the ball
+	if (Other && Other->IsA(ACubePawn::StaticClass()))
+	{
+        // Stores true if the same actor did not hit the ball twice
+        const bool bDifferentActorHitBall = (LastActorHit != Other);
+        // Stores true if enough time has been passed for the same actor to hit the ball twice
+        const bool bCooldownElapsed = (GetWorld()->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
+        
+        // If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
+        if (bDifferentActorHitBall || bCooldownElapsed)
+        {
+            // Get the direction from the player's center to the ball's center. This is the direction the ball will bounce
+            FVector BounceDirection = (this->GetActorLocation() - Other->GetActorLocation()).GetSafeNormal();
+            // Make the ball go in the opposite direction it was hit.
+            Direction = BounceDirection;
+            // Reset the ball's speed to default once it hits a player
+            Speed = DefaultSpeed;
+        
+            // Update the last time the ball was hit by an actor
+            LastHitTime = GetWorld()->GetTimeSeconds();
+            LastActorHit = Other;
+        }
+        
+        // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
+        Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
+	}
+	// Else, if anything other than a player hit the ball
+	else
 	{
 		// Make the ball go in the opposite direction it was hit.
 		Direction = Direction.MirrorByVector(HitNormal);
 
-		// If a cube pawn hit the ball
-		if (Other && Other->IsA(ACubePawn::StaticClass()))
-		{
-			if (GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, "Hit pawn");
+		// Maintain the ball's current speed when bouncing off a wall. The ball should not change speeds after bouncing off a static object
+		Speed = BallMesh->GetPhysicsLinearVelocity().Size();
 
-			// Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
-			Direction += Other->GetVelocity() * PlayerSpeedBounceFactor
-		}
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("New speed %d"), Speed));
 	}
 
-	// Update the last time the ball was hit by an actor
-	LastHitTime = GetWorld()->GetTimeSeconds();
-	LastActorHit = Other;
-
+	// Update the ball's velocity based on the 'Speed' and 'Direction' variables.
+	UpdateVelocity();
 }
 
-/** Called when another actor begins to touch the ball. */
-void ABall::NotifyActorBeginOverlap(AActor* OtherActor)
+/** Called when another actor begins to touch the ball. This method is only called when a player hits the ball.  */
+void ABall::NotifyActorBeginOverlap(AActor* Other)
 {
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, "Begin to hit pawn");
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, "Begin to hit pawn");
+
+    /**
+     
+	// If a cube pawn hit the ball
+	if (Other && Other->IsA(ACubePawn::StaticClass()))
+	{
+		// Stores true if the same actor did not hit the ball twice 
+		//const bool bDifferentActorHitBall = (LastActorHit != Other);
+		// Stores true if enough time has been passed for the same actor to hit the ball twice
+		//const bool bCooldownElapsed = (GetWorld()->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
+
+		// If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
+		//if (bDifferentActorHitBall || bCooldownElapsed)
+		//{
+			// Get the direction from the player's center to the ball's center. This is the direction the ball will bounce
+			FVector BounceDirection = (this->GetActorLocation() - Other->GetActorLocation()).GetSafeNormal();
+ 			// Make the ball go in the opposite direction it was hit.
+			Direction = BounceDirection;
+			// Reset the ball's speed to default once it hits a player
+			Speed = DefaultSpeed;
+
+			// Update the last time the ball was hit by an actor
+			//LastHitTime = GetWorld()->GetTimeSeconds();
+			//LastActorHit = Other;
+		//}
+
+		// Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
+		Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
+	}
+
+	// Update the ball's velocity based on the 'Speed' and 'Direction' variables.
+	UpdateVelocity();
+     
+     */
 }
 

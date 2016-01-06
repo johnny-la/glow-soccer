@@ -180,8 +180,8 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
         LeftPlayerScore++;
     }
     
-    // Get the game mode controlling the game.
-    ACubeProjectGameMode* GameMode = GetWorld()->GetAuthGameMode<ACubeProjectGameMode>();
+    // Retrieve the UWorld instance controlling the game
+    UWorld* World = GetWorld();
     // Retrieve the object controlling the game's state
     ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
 
@@ -209,9 +209,22 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
     }
     
     // Play the sound of the ball hitting a goal
-    if(GameMode->BallHitGoalSound)
+    if(BallHitGoalSound)
     {
-        UGameplayStatics::PlaySound2D(GetWorld(),GameMode->BallHitGoalSound);
+        UGameplayStatics::PlaySound2D(World,BallHitGoalSound);
+    }
+    
+    // Play an explosion particle effect on the ball since a goal was just scored
+    if(BallExplosionParticles)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(World,BallExplosionParticles,Ball->GetActorLocation());
+    }
+    
+    // Play a camera shake when the user scores a goal
+    if(ScoreGoalCameraShake)
+    {
+        World->GetFirstPlayerController()->ClientPlayCameraShake(ScoreGoalCameraShake, 1.0f, ECameraAnimPlaySpace::World,
+                                                                                FRotator::ZeroRotator);
     }
     
 }

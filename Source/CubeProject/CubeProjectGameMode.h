@@ -57,6 +57,29 @@ public:
     UPROPERTY(EditDefaultsOnly, Category=Sounds)
     USoundCue* PlayerSpinSound;
     
+    /** The particle effect played on the ball when a goal is scored. */
+    UPROPERTY(EditDefaultsOnly, Category=Particles)
+    UParticleSystem* BallExplosionParticles;
+    /** The particle effect played when the ball hits a wall. */
+    UPROPERTY(EditDefaultsOnly, Category=Particles)
+    UParticleSystem* BallHitWallParticles;
+    /** The particle effect played when the ball hits a player. */
+    UPROPERTY(EditDefaultsOnly, Category=Particles)
+    UParticleSystem* BallHitPlayerParticles;
+    /** The particle effect played when a player spins. */
+    UPROPERTY(EditDefaultsOnly, Category=Particles)
+    UParticleSystem* PlayerSpinParticles;
+    
+    /** The camera shake played when a player scores a goal. */
+    UPROPERTY(EditDefaultsOnly, Category=CameraShake)
+    TSubclassOf<UCameraShake> ScoreGoalCameraShake;
+    /** The camera shake played when a player hits the ball. */
+    UPROPERTY(EditDefaultsOnly, Category=CameraShake)
+    TSubclassOf<UCameraShake> BallHitPlayerCameraShake;
+    /** The camera shake played when the ball hits a wall. */
+    UPROPERTY(EditDefaultsOnly, Category=CameraShake)
+    TSubclassOf<UCameraShake> BallHitWallCameraShake;
+    
     /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
     static const FVector SCORE_TEXT_POSITION;
     

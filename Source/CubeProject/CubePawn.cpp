@@ -172,6 +172,12 @@ void ACubePawn::OnReleaseActionButton()
     {
         UGameplayStatics::PlaySound2D(GetWorld(),GameMode->PlayerSpinSound);
     }
+    
+    // Play particles at the position the player is spinning
+    if(GameMode->PlayerSpinParticles)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(),GameMode->PlayerSpinParticles,GetActorLocation());
+    }
 }
 
 /** Called when the second player releases his action button. We need this method because only a single pawn can receive

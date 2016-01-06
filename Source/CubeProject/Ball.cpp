@@ -157,6 +157,18 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
             UGameplayStatics::PlaySound2D(World,GameMode->BallHitPlayerSound);
         }
         
+        // Spawn particles where the ball hit the player.
+        if(GameMode->BallHitPlayerParticles)
+        {
+            UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitPlayerParticles,Other->GetActorLocation());
+        }
+        
+        // Play a camera shake when the ball hits a player
+        if(GameMode->BallHitPlayerCameraShake)
+        {
+            World->GetFirstPlayerController()->ClientPlayCameraShake(GameMode->BallHitPlayerCameraShake,1.0f,ECameraAnimPlaySpace::World,
+                                                                     FRotator::ZeroRotator);
+        }
 	}
 	// Else, if anything other than a player hit the ball
 	else
@@ -172,6 +184,20 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
         {
             UGameplayStatics::PlaySound2D(World,GameMode->BallHitWallSound);
         }
+        
+        // Spawn particles where the ball hit the wall.
+        if(GameMode->BallHitWallParticles)
+        {
+            UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitWallParticles,HitLocation);
+        }
+        
+        // Play a camera shake when the ball hits a wall
+        if(GameMode->BallHitWallCameraShake)
+        {
+            World->GetFirstPlayerController()->ClientPlayCameraShake_Implementation(GameMode->BallHitWallCameraShake, 1.0f, ECameraAnimPlaySpace::World,
+                                                                                    FRotator::ZeroRotator);
+        }
+
         
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("New speed %d"), Speed));

@@ -3,6 +3,7 @@
 #include "CubeProject.h"
 #include "CubePawn.h"
 #include "CubePawnMovementComponent.h"
+#include "CubeProjectGameMode.h"
 
 ACubePawn::ACubePawn()
 {
@@ -162,9 +163,18 @@ void ACubePawn::OnReleaseActionButton()
 
 	// The pawn can't spin again until it is done its current spin
 	bSpinning = true;
+    
+    // Get the game mode which stores the game sounds
+    ACubeProjectGameMode* GameMode = GetWorld()->GetAuthGameMode<ACubeProjectGameMode>();
+    
+    // Play the sound of the player spinning
+    if(GameMode->PlayerSpinSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(),GameMode->PlayerSpinSound);
+    }
 }
 
-/** Called when the second player releases his action button. We need this method because only a single pawn can receive 
+/** Called when the second player releases his action button. We need this method because only a single pawn can receive
   * keyboard input. Hence, this pawn class is responsible for moving the second one too. */
 void ACubePawn::OnReleaseActionButton_P2()
 {

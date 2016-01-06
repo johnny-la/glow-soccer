@@ -12,7 +12,7 @@
 const FVector ACubeProjectGameMode::SCORE_TEXT_POSITION = FVector(0.0f,100.0f,252.0f);
 
 /** The default score needed for a player to win the game. */
-const int32 ACubeProjectGameMode::DEFAULT_SCORE_TO_WIN = 1;
+const int32 ACubeProjectGameMode::DEFAULT_SCORE_TO_WIN = 3;
 
 // Initializes the default properties for the game mode
 ACubeProjectGameMode::ACubeProjectGameMode()
@@ -180,6 +180,8 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
         LeftPlayerScore++;
     }
     
+    // Get the game mode controlling the game.
+    ACubeProjectGameMode* GameMode = GetWorld()->GetAuthGameMode<ACubeProjectGameMode>();
     // Retrieve the object controlling the game's state
     ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
 
@@ -189,7 +191,6 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
     
     // Retrieve the GameState instance controlling the game's state.
     ACubeProjectGameState* CurrentGameState = GetGameState<ACubeProjectGameState>();
-    
     
     if(CurrentGameState)
     {
@@ -206,7 +207,13 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
             GameState->SetState(EGameState::RESET);
         }
     }
-        
+    
+    // Play the sound of the ball hitting a goal
+    if(GameMode->BallHitGoalSound)
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(),GameMode->BallHitGoalSound);
+    }
+    
 }
 
 void ACubeProjectGameMode::PushBall(const bool bMoveRight)

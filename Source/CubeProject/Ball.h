@@ -29,7 +29,7 @@ public:
 	void StartMove(const bool bMoveRight);
     
     /** Resets the ball to its starting position (0,0) */
-    void Reset();
+    void Reset();    
 
 	/** The amount of time that must pass for the same player to hit the ball twice. If the player could hit the ball multiple times in
 	  * in a short time frame, the physics would be glitchy. */

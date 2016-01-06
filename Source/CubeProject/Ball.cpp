@@ -2,6 +2,7 @@
 #include "CubeProject.h"
 #include "CubePawn.h"
 #include "Ball.h"
+#include "CubeProjectGameMode.h"
 
 // The amount of time which must elapse for the same actor to hit the ball twice
 const float ABall::MULTIPLE_HIT_COOLDOWN = 1.0f;
@@ -118,6 +119,11 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
 {
 	// Set the ball's velocity to zero. The ball's movement and velocity is controlled manually in the Tick() method.
 	//BallMesh->SetAllPhysicsLinearVelocity(FVector(0, 0, 0));
+    
+    // Obtain the world which controls the game
+    UWorld* World = GetWorld();
+    // Retrieve the GameMode instance which stores the game sounds
+    ACubeProjectGameMode* GameMode = World->GetAuthGameMode<ACubeProjectGameMode>();
 
 	// If a cube pawn hit the ball
 	if (Other && Other->IsA(ACubePawn::StaticClass()))
@@ -125,7 +131,7 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
         // Stores true if the same actor did not hit the ball twice
         const bool bDifferentActorHitBall = (LastActorHit != Other);
         // Stores true if enough time has been passed for the same actor to hit the ball twice
-        const bool bCooldownElapsed = (GetWorld()->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
+        const bool bCooldownElapsed = (World->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
         
         // If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
         if (bDifferentActorHitBall || bCooldownElapsed)
@@ -138,12 +144,19 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
             Speed = DefaultSpeed;
         
             // Update the last time the ball was hit by an actor
-            LastHitTime = GetWorld()->GetTimeSeconds();
+            LastHitTime = World->GetTimeSeconds();
             LastActorHit = Other;
         }
         
         // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
         Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
+        
+        // Play the sound of the ball hitting a player
+        if(GameMode->BallHitPlayerSound)
+        {
+            UGameplayStatics::PlaySound2D(World,GameMode->BallHitPlayerSound);
+        }
+        
 	}
 	// Else, if anything other than a player hit the ball
 	else
@@ -154,6 +167,12 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
 		// Maintain the ball's current speed when bouncing off a wall. The ball should not change speeds after bouncing off a static object
 		Speed = BallMesh->GetPhysicsLinearVelocity().Size();
 
+        // Play the sound of the ball hitting a wall
+        if(GameMode->BallHitWallSound)
+        {
+            UGameplayStatics::PlaySound2D(World,GameMode->BallHitWallSound);
+        }
+        
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("New speed %d"), Speed));
 	}

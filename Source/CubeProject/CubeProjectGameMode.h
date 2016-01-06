@@ -44,6 +44,19 @@ public:
      * when the game starts. */
     bool DidRightPlayerScoreLast() const;
     
+    /** The sound played when the ball hits a player. */
+    UPROPERTY(EditDefaultsOnly, Category=Sounds)
+    USoundCue* BallHitPlayerSound;
+    /** The sound played when the ball hits a wall. */
+    UPROPERTY(EditDefaultsOnly, Category=Sounds)
+    USoundCue* BallHitWallSound;
+    /** The sound played when the ball enters the goal. */
+    UPROPERTY(EditDefaultsOnly, Category=Sounds)
+    USoundCue* BallHitGoalSound;
+    /** The sound played when a player spins. */
+    UPROPERTY(EditDefaultsOnly, Category=Sounds)
+    USoundCue* PlayerSpinSound;
+    
     /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
     static const FVector SCORE_TEXT_POSITION;
     

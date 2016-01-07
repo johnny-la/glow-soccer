@@ -20,6 +20,13 @@ ACubePawn::ACubePawn()
 	BaseCollisionComponent->InitSphereRadius(40.0f);
 	BaseCollisionComponent->SetCollisionProfileName(TEXT("PAWN"));
 	BaseCollisionComponent->SetNotifyRigidBodyCollision(true);
+    
+    // Create the main box collider for the cube's collision detection
+    /*BaseCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("RootComponent"));
+    RootComponent = BaseCollisionComponent;
+    BaseCollisionComponent->InitBoxExtent(FVector(0.0f,20.0f,20.0f));
+    BaseCollisionComponent->SetCollisionProfileName(TEXT("PAWN"));
+    BaseCollisionComponent->SetNotifyRigidBodyCollision(true);*/
 
 	// Create the static mesh used to visualize the cube
 	CubeMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeMesh"));

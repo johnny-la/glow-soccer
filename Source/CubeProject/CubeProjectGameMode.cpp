@@ -11,9 +11,6 @@
 /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
 const FVector ACubeProjectGameMode::SCORE_TEXT_POSITION = FVector(0.0f,100.0f,252.0f);
 
-/** The default score needed for a player to win the game. */
-const int32 ACubeProjectGameMode::DEFAULT_SCORE_TO_WIN = 3;
-
 // Initializes the default properties for the game mode
 ACubeProjectGameMode::ACubeProjectGameMode()
 {
@@ -49,9 +46,6 @@ ACubeProjectGameMode::ACubeProjectGameMode()
     DefaultPawnClass = Player1PawnClass;
     // Set the default class used to control game state
     GameStateClass = ACubeProjectGameState::StaticClass();
-    
-    // Set the score to win to default
-    ScoreToWin = DEFAULT_SCORE_TO_WIN;
 
     // Spawn a spectator pawn initially. The actual player pawns are spawned manually in BeginPlay()
     //DefaultPawnClass = SpectatorClass;
@@ -64,6 +58,9 @@ void ACubeProjectGameMode::BeginPlay()
     
     // Sets the player scores to zero
     LeftPlayerScore = RightPlayerScore = 0;
+    
+    // Set the score to win to default
+    ScoreToWin = DefaultScoreToWin;
     
     // Retrieve the UWorld instance
     UWorld* World = GetWorld();
@@ -135,6 +132,42 @@ void ACubeProjectGameMode::BeginPlay()
     Player2Pawn = RightPlayerPawn;
 }
 
+AActor* ACubeProjectGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+    // Get the UWorld instance controlling the game
+    UWorld* World = GetWorld();
+    
+    if(GEngine)
+        GEngine->AddOnScreenDebugMessage(-1,10.0f,FColor::White,"CHOOSE SPAWN POINT");
+    
+    // Iterate through each player start in the game and choose an appropriate one for the given player
+    for(TActorIterator<APlayerStart> PlayerStartIterator(World); PlayerStartIterator; ++PlayerStartIterator)
+    {
+        // Spawn the first player (player 0) at the player start with tag "0"
+        if(Player == UGameplayStatics::GetPlayerController(World,0) && PlayerStartIterator->PlayerStartTag == "0")
+        {
+            if(GEngine)
+                GEngine->AddOnScreenDebugMessage(-1,10.0f,FColor::White,"Spawn player 0");
+            
+            return *PlayerStartIterator;
+        }
+        // Spawn the second player at the player start with tag "1" (set in the details panel of the player start actor)
+        else if(Player == UGameplayStatics::GetPlayerController(World,1) && PlayerStartIterator->PlayerStartTag == "1")
+        {
+            if(GEngine)
+                GEngine->AddOnScreenDebugMessage(-1,10.0f,FColor::White,"Spawn player 1");
+            
+            return *PlayerStartIterator;
+        }
+    }
+    
+    if(GEngine)
+        GEngine->AddOnScreenDebugMessage(-1,10.0f,FColor::White,"Choose default spawn");
+    
+    // If no player start has been chosen, let Unreal choose it by default
+    return Super::ChoosePlayerStart(Player);
+}
+
 void ACubeProjectGameMode::OnBallOverlap(AActor* OtherActor)
 {
     // If the actor which overlapped the ball is non-null, check if the ball hit a goal.
@@ -199,6 +232,12 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
         {
             // Inform the GameState instance that the game is over.
             GameState->SetState(EGameState::GAME_OVER);
+            
+            // Play the game-winning sound
+            if(WinGameSound)
+            {
+                UGameplayStatics::PlaySound2D(World,WinGameSound);
+            }
         }
         // Else, if the game still isn't over, reset the ball and the players to their start positions.
         else

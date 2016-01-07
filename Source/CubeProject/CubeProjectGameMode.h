@@ -15,6 +15,10 @@ public:
     // Called when the game starts
     virtual void BeginPlay() override;
     
+    /** Returns the PlayerStart actor where the given player should spawn. This is used to make sure that the first player
+      * is always spawned at the right and the second player is always spawned to the left. */
+    virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+    
     /** Called when the ball overlaps another actor. If a goal is overlapped, a point is given to the correct player. */
     UFUNCTION()
     void OnBallOverlap(AActor* OtherActor);
@@ -36,7 +40,7 @@ public:
     /** Returns the score obtained by the player which starts on the right-hand side of the field. */
     int32 GetRightPlayerScore() const;
     
-    /** Returns the ball currently on the field. */
+    /** Returns the ball currently on the field. */
     class ABall* GetBall();
     
     /** If true, the right player won last. i.e., the player starting on the right of the field scored the last goal.
@@ -44,6 +48,16 @@ public:
      * when the game starts. */
     bool DidRightPlayerScoreLast() const;
     
+    /** The default score needed to win the game. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
+    int32 DefaultScoreToWin = 3;
+    
+    /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
+    static const FVector SCORE_TEXT_POSITION;
+    
+    /*****************************************************************************/
+    /******************* ASSETS ASSIGNED IN GAMEMODE BLUEPRINT *******************/
+    /*****************************************************************************/
     /** The sound played when the ball hits a player. */
     UPROPERTY(EditDefaultsOnly, Category=Sounds)
     USoundCue* BallHitPlayerSound;
@@ -56,6 +70,9 @@ public:
     /** The sound played when a player spins. */
     UPROPERTY(EditDefaultsOnly, Category=Sounds)
     USoundCue* PlayerSpinSound;
+    /** The sound played when a player wins the game. */
+    UPROPERTY(EditDefaultsOnly, Category=Sounds)
+    USoundCue* WinGameSound;
     
     /** The particle effect played on the ball when a goal is scored. */
     UPROPERTY(EditDefaultsOnly, Category=Particles)
@@ -79,12 +96,7 @@ public:
     /** The camera shake played when the ball hits a wall. */
     UPROPERTY(EditDefaultsOnly, Category=CameraShake)
     TSubclassOf<UCameraShake> BallHitWallCameraShake;
-    
-    /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
-    static const FVector SCORE_TEXT_POSITION;
-    
-    /** The default score needed to win the game. */
-    static const int32 DEFAULT_SCORE_TO_WIN;
+    /*****************************************************************************/
 
 private:
     /** Called when the ball enters one of the goals and one of the players score. 

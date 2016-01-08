@@ -12,8 +12,8 @@ ACubeProjectGameState::ACubeProjectGameState()
     // Call the Tick() function every frame
     PrimaryActorTick.bCanEverTick = true;
     
-    // The game always starts in 'Waiting' mode
-    CurrentState = EGameState::RESET;
+    // The game always starts in 'BOOT' mode
+    CurrentState = EGameState::GAME_BOOT;
 }
 
 void ACubeProjectGameState::Tick(float DeltaTime)
@@ -35,6 +35,19 @@ void ACubeProjectGameState::Tick(float DeltaTime)
         // Switch the current state and update the game state accordingly.
         switch(CurrentState)
         {
+            case EGameState::GAME_BOOT:
+            {
+                // Disable player input when the game starts
+                GameMode->SetPlayerInputEnabled(false);
+                // Transition to the main menu when the game boots
+                CurrentState = EGameState::MAIN_MENU;
+                break;
+            }
+            case EGameState::MAIN_MENU:
+            {
+                // Wait for the user to press enter
+                break;
+            }
             case EGameState::RESET:
             {
                 // Reset the game field so that each player is in their starting position
@@ -68,6 +81,7 @@ void ACubeProjectGameState::Tick(float DeltaTime)
             }
             case EGameState::PLAYING:
             {
+                // Wait for a player to score
                 break;
             }
             case EGameState::GAME_OVER:
@@ -107,6 +121,11 @@ void ACubeProjectGameState::OnGameStart()
 {
     // Push the ball to start the game.
     CurrentState = EGameState::PUSH_BALL;
+}
+
+EGameState::Type ACubeProjectGameState::GetState() const
+{
+    return CurrentState;
 }
 
 void ACubeProjectGameState::SetState(EGameState::Type GameState)

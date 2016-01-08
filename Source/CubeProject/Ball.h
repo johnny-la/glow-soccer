@@ -46,7 +46,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* BallMesh;
 
-	/** The ball's default speed when spawned */
+	/** The ball's default speed when spawned and when bouncing off a player */
 	UPROPERTY(EditAnywhere, Category=BallPhysics)
 	float DefaultSpeed = 300.0f;
 

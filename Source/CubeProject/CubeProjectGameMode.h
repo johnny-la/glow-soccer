@@ -37,6 +37,12 @@ public:
       * pressed the "Restart" key. */
     void RestartGame();
     
+    /** Starts the game. Called from ACubePawn::StartGame() when the user presses the start key in the main menu. */
+    void StartGame();
+    /** Called when the "Quit Main Menu" timer is complete. This timer is a small delay between the time the user presses
+      * ENTER in the main menu and the time the game starts. This allows breathing room before the game starts */
+    void OnQuitMainMenuTimerComplete();
+    
     /** Sets whether or not the players can move their pawns. If true, the users can move their avatars. Called in ACubeProjectGameState.
       * When the timer is enabled and the game is waiting to start, player input is disabled. */
     void SetPlayerInputEnabled(bool bEnabled);
@@ -57,6 +63,10 @@ public:
     /** The default score needed to win the game. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
     int32 DefaultScoreToWin = 3;
+    /** The duration of the "Quit Main Menu" timer. This timer is a small delay between the time the user presses
+      * ENTER in the main menu and the time the game starts. This allows breathing room before the game starts */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
+    float QuitMainMenuTimerDuration = 1;
     
     /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
     static const FVector SCORE_TEXT_POSITION;
@@ -113,6 +123,11 @@ private:
     /** The name of the map for a two-player match. This is the level loaded once the game restarts. */
     UPROPERTY(EditAnywhere, Category=GameSettings)
     FName TwoPlayerGameMapName;
+    
+    /** The handle which is in charge of controlling the "Quit Main Menu" timer. This timer is a small delay between
+      * the time the user presses enter in the main menu and the time the game starts. This allows breathing room 
+      * before the game starts */
+    FTimerHandle QuitMainMenuTimerHandle;
     
     /** The pawn blueprint used for the first player. */
     TSubclassOf<class APawn> Player1PawnClass;

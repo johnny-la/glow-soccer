@@ -8,6 +8,8 @@ namespace EGameState
 {
     enum Type
     {
+        GAME_BOOT,
+        MAIN_MENU,
         RESET,
         WAITING_TO_START,
         PUSH_BALL,
@@ -28,6 +30,9 @@ public:
     
     // Called every frame to update the game's state
     virtual void Tick(float DeltaTime) override;
+    
+    /** Returns the current state of the game. */
+    EGameState::Type GetState() const;
     
     /** Sets the current state of the game. This affects the logic in the Tick() method. */
     void SetState(EGameState::Type NewState);

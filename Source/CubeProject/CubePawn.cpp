@@ -77,6 +77,7 @@ void ACubePawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
     // Since only one pawn can receive input from the keyboard, we bind the buttons for both players using this single pawn class
     InputComponent->BindAction("Spin_P2", IE_Released, this, &ACubePawn::OnReleaseActionButton_P2);
     InputComponent->BindAction("Restart", IE_Released, this, &ACubePawn::RestartGame);
+    InputComponent->BindAction("StartGame", IE_Released, this, &ACubePawn::StartGame);
     
 	// Bind the axis inputs to the correct member functions.
 	InputComponent->BindAxis("MoveY_P1", this, &ACubePawn::MoveY);
@@ -178,7 +179,7 @@ void ACubePawn::OnReleaseActionButton()
     // Play the sound of the player spinning
     if(GameMode->PlayerSpinSound)
     {
-        UGameplayStatics::PlaySound2D(GetWorld(),GameMode->PlayerSpinSound);
+        UGameplayStatics::PlaySoundAtLocation(GetWorld(),GameMode->PlayerSpinSound,GetActorLocation());
     }
     
     // Play particles at the position the player is spinning
@@ -214,6 +215,19 @@ void ACubePawn::AddThrust()
 
 	// Add the desired force to the pawn's current velocity
 	PawnMovementComponent->Velocity = PawnMovementComponent->Velocity + ThrustForce;
+}
+
+/** Called when the user presses ENTER in the main menu */
+void ACubePawn::StartGame()
+{
+    // Get the game mode controlling the game
+    ACubeProjectGameMode* GameMode = GetWorld()->GetAuthGameMode<ACubeProjectGameMode>();
+    
+    if(GameMode)
+    {
+        // Tell the game mode to start the game
+        GameMode->StartGame();
+    }
 }
 
 void ACubePawn::RestartGame()

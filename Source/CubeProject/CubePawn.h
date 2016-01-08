@@ -91,6 +91,8 @@ private:
     /** Called when the second player releases his action button. We need this method because only a single pawn can receive
       * keyboard input. Hence, this pawn class is responsible for moving the second one too. */
     void OnReleaseActionButton_P2();
+    /** Called when the user presses the Start key in the main menu. Tells the current game mode to start the game. */
+    void StartGame();
     /** Called when the user presses the Restart key. Tells the current game mode to restart the game. */
     void RestartGame();
     

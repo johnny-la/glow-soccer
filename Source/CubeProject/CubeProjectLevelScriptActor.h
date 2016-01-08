@@ -17,6 +17,10 @@ public:
     // Called every frame
     virtual void Tick(float DeltaSeconds) override;
     
+    /** Called when the user presses the ENTER key in the main menu. Hides the main menu to start the game. */
+    UFUNCTION(BlueprintImplementableEvent)
+    void HideMainMenu();
+    
     /** Called when a player scores and the game restarts. This method displays the "READY, GO!!" message on screen.
      * Note: This method is called from ACubeProjectGameMode::Tick() when the game is in "RESET" state. */
     UFUNCTION(BlueprintImplementableEvent)

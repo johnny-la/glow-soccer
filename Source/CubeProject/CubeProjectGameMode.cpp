@@ -233,7 +233,7 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
             // Play the game-winning sound
             if(WinGameSound)
             {
-                UGameplayStatics::PlaySound2D(World,WinGameSound);
+                UGameplayStatics::PlaySoundAtLocation(World,WinGameSound,FVector::ZeroVector);
             }
         }
         // Else, if the game still isn't over, reset the ball and the players to their start positions.
@@ -247,7 +247,7 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
     // Play the sound of the ball hitting a goal
     if(BallHitGoalSound)
     {
-        UGameplayStatics::PlaySound2D(World,BallHitGoalSound);
+        UGameplayStatics::PlaySoundAtLocation(World,BallHitGoalSound,Ball->GetActorLocation());
     }
     
     // Play an explosion particle effect on the ball since a goal was just scored
@@ -277,6 +277,38 @@ void ACubeProjectGameMode::ResetField()
     Player1Pawn->Reset();
     Player2Pawn->Reset();
     Ball->Reset();
+}
+
+/** Called from ACubePawn::StartGame() when the user presses the ENTER key in the main menu. */
+void ACubeProjectGameMode::StartGame()
+{
+    // Retrieve the object controlling the game's state
+    ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
+    
+    // Only start the game if the user is in the main menu
+    if(GameState->GetState() == EGameState::MAIN_MENU)
+    {
+        // Get the level Blueprint controlling the game
+        ACubeProjectLevelScriptActor* LevelScript = Cast<ACubeProjectLevelScriptActor>(GetWorld()->GetLevelScriptActor());
+    
+        // Tell the level Blueprint to hide the main menu to start the game.
+        LevelScript->HideMainMenu();
+        
+        // Start a timer which will call OnQuitMainMenuTimerComplete() once complete.
+        // Once this method is called, game state is switched to "RESET" and the game starts
+        GetWorld()->GetTimerManager().SetTimer(QuitMainMenuTimerHandle,this,&ACubeProjectGameMode::OnQuitMainMenuTimerComplete,QuitMainMenuTimerDuration,false);
+    }
+}
+
+void ACubeProjectGameMode::OnQuitMainMenuTimerComplete()
+{
+    // Retrieve the object controlling the game's state
+    ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
+    // Tell the GameState instance to reset the field and start the game
+    GameState->SetState(EGameState::RESET);
+    
+    if(GEngine)
+        GEngine->AddOnScreenDebugMessage(-1,10,FColor::Blue,"START GAME");
 }
 
 void ACubeProjectGameMode::RestartGame()

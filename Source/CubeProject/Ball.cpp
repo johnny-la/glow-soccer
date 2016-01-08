@@ -165,7 +165,7 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
         // Play the sound of the ball hitting a player
         if(GameMode->BallHitPlayerSound)
         {
-            UGameplayStatics::PlaySound2D(World,GameMode->BallHitPlayerSound);
+            UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitPlayerSound,GetActorLocation());
         }
         
         // Spawn particles where the ball hit the player.
@@ -193,7 +193,7 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
         // Play the sound of the ball hitting a wall
         if(GameMode->BallHitWallSound)
         {
-            UGameplayStatics::PlaySound2D(World,GameMode->BallHitWallSound);
+            UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitWallSound,GetActorLocation());
         }
         
         // Spawn particles where the ball hit the wall.

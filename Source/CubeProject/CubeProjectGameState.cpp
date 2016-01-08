@@ -39,6 +39,8 @@ void ACubeProjectGameState::Tick(float DeltaTime)
             {
                 // Reset the game field so that each player is in their starting position
                 GameMode->ResetField();
+                // Update the text displaying the score
+                GameMode->UpdateScoreText();
                 // Disable player input until the timer elapses
                 GameMode->SetPlayerInputEnabled(false);
                 // Start a timer which will call OnGameStart once complete. Once this method is called, game state is switched to "PUSH_BALL"
@@ -75,9 +77,20 @@ void ACubeProjectGameState::Tick(float DeltaTime)
                     // the yellow player won the game. Thus, pass in true so that "Yellow Player Wins" is displayed.
                     LevelBlueprint->ShowWinMessage(GameMode->DidRightPlayerScoreLast());
                 
+                // Update the text displaying the score
+                GameMode->UpdateScoreText();
+                
                 // Disable player input
                 GameMode->SetPlayerInputEnabled(false);
-                GameMode->GetBall()->Destroy();
+                // Disable the ball until the game is restarted
+                GameMode->GetBall()->SetEnabled(false);
+                // Wait for the user to press the restart key
+                CurrentState = EGameState::WAITING_TO_RESTART;
+                break;
+            }
+            case EGameState::WAITING_TO_RESTART:
+            {
+                // Wait for the user to press  the restart key. At that point, the game will be transitioned to RESET state
                 break;
             }
                 

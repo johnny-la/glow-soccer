@@ -28,8 +28,14 @@ public:
       */
     void PushBall(const bool bMoveRight);
     
+    /** Updates the score text to reflect the current game score. Called from ACubeProjectGameState::Tick() when the game is in RESET state. */
+    void UpdateScoreText();
+    
     /** Called when a player scores. Resets the players and the ball at their default locations. Called from ACubeProjectGameState::Tick(). */
     void ResetField();
+    /** Called when the user presses the Restart key. This is called from the ACubePawn::RestartGame() function, which is called when the user
+      * pressed the "Restart" key. */
+    void RestartGame();
     
     /** Sets whether or not the players can move their pawns. If true, the users can move their avatars. Called in ACubeProjectGameState.
       * When the timer is enabled and the game is waiting to start, player input is disabled. */
@@ -103,6 +109,10 @@ private:
       * @param bRightPlayerScored true if the right-hand side player (player 2) scored. False if player 1 scored.
      */
     void OnGoal(bool bRightPlayerScored);
+    
+    /** The name of the map for a two-player match. This is the level loaded once the game restarts. */
+    UPROPERTY(EditAnywhere, Category=GameSettings)
+    FName TwoPlayerGameMapName;
     
     /** The pawn blueprint used for the first player. */
     TSubclassOf<class APawn> Player1PawnClass;

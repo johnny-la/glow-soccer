@@ -7,6 +7,7 @@
 #include "Goal.h"
 #include "Engine/TextRenderActor.h"
 #include "CubeProjectGameState.h"
+#include "CubeProjectLevelScriptActor.h"
 
 /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
 const FVector ACubeProjectGameMode::SCORE_TEXT_POSITION = FVector(0.0f,100.0f,252.0f);
@@ -218,10 +219,6 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
     // Retrieve the object controlling the game's state
     ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
 
-    // Update the score displayed on screen using the TextRenderActors displaying the game score
-    ScoreTextLeft->GetTextRender()->SetText(FText::AsNumber(LeftPlayerScore));
-    ScoreTextRight->GetTextRender()->SetText(FText::AsNumber(RightPlayerScore));
-    
     // Retrieve the GameState instance controlling the game's state.
     ACubeProjectGameState* CurrentGameState = GetGameState<ACubeProjectGameState>();
     
@@ -282,14 +279,56 @@ void ACubeProjectGameMode::ResetField()
     Ball->Reset();
 }
 
+void ACubeProjectGameMode::RestartGame()
+{
+    // Reload the game level
+    //UGameplayStatics::OpenLevel(GetWorld(),TwoPlayerGameMapName);
+    
+    // Retrieve the object controlling the game's state
+    ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
+    // Tell the GameState instance to reset the field
+    GameState->SetState(EGameState::RESET);
+    
+    // Reset the field and the score.
+    LeftPlayerScore = RightPlayerScore = 0;
+    
+    // Obtain the level Blueprint used to play Matinee animations
+    ACubeProjectLevelScriptActor* LevelScript = Cast<ACubeProjectLevelScriptActor>(GetWorld()->GetLevelScriptActor());
+    if(LevelScript)
+    {
+        // Hide and reset the animations in the game
+        LevelScript->RestartGame();
+    }
+    
+}
+
+void ACubeProjectGameMode::UpdateScoreText()
+{
+    // Update the score displayed on screen using the TextRenderActors displaying the game score
+    ScoreTextLeft->GetTextRender()->SetText(FText::AsNumber(LeftPlayerScore));
+    ScoreTextRight->GetTextRender()->SetText(FText::AsNumber(RightPlayerScore));
+
+}
+
 void ACubeProjectGameMode::SetPlayerInputEnabled(bool bEnabled)
 {
     // Get the world instance controlling the game
     UWorld* World = GetWorld();
     
-    // Set whether or not the players are moveable.
-    UGameplayStatics::GetPlayerController(World,0)->SetIgnoreMoveInput(!bEnabled);
-    UGameplayStatics::GetPlayerController(World,1)->SetIgnoreMoveInput(!bEnabled);
+    // If player input should be enabled
+    if(bEnabled)
+    {
+        // Enable player input
+        UGameplayStatics::GetPlayerController(World,0)->ResetIgnoreMoveInput();
+        UGameplayStatics::GetPlayerController(World,1)->ResetIgnoreMoveInput();
+    }
+    // Else, if player input should be disabled
+    else
+    {
+        // Disable player input
+        UGameplayStatics::GetPlayerController(World,0)->SetIgnoreMoveInput(true);
+        UGameplayStatics::GetPlayerController(World,1)->SetIgnoreMoveInput(true);
+    }
 }
 
 ABall* ACubeProjectGameMode::GetBall()

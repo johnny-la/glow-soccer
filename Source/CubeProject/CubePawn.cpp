@@ -76,6 +76,7 @@ void ACubePawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 	InputComponent->BindAction("Spin_P1", IE_Released, this, &ACubePawn::OnReleaseActionButton);
     // Since only one pawn can receive input from the keyboard, we bind the buttons for both players using this single pawn class
     InputComponent->BindAction("Spin_P2", IE_Released, this, &ACubePawn::OnReleaseActionButton_P2);
+    InputComponent->BindAction("Restart", IE_Released, this, &ACubePawn::RestartGame);
     
 	// Bind the axis inputs to the correct member functions.
 	InputComponent->BindAxis("MoveY_P1", this, &ACubePawn::MoveY);
@@ -213,6 +214,18 @@ void ACubePawn::AddThrust()
 
 	// Add the desired force to the pawn's current velocity
 	PawnMovementComponent->Velocity = PawnMovementComponent->Velocity + ThrustForce;
+}
+
+void ACubePawn::RestartGame()
+{
+    // Get the game mode currently controlling the game
+    ACubeProjectGameMode* GameMode = GetWorld()->GetAuthGameMode<ACubeProjectGameMode>();
+    
+    if(GameMode)
+    {
+        // Restart the game.
+        GameMode->RestartGame();
+    }
 }
 
 void ACubePawn::Reset()

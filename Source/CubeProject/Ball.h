@@ -28,6 +28,9 @@ public:
 	/** Called when the ball spawns. Gives the ball an initial push. If bMoveRight is true, the ball is launched to the right of the field. */
 	void StartMove(const bool bMoveRight);
     
+    /** Enables/disables the ball. If disabled, the ball is no longer rendered on screen. */
+    void SetEnabled(const bool bEnabled);
+    
     /** Resets the ball to its starting position (0,0) */
     void Reset();    
 

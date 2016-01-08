@@ -26,6 +26,10 @@ public:
     UFUNCTION(BlueprintImplementableEvent)
     void ShowWinMessage(const bool bYellowPlayerWins);
     
+    /** Called when the game is restarted. Resets and hides all the game's animations. */
+    UFUNCTION(BlueprintImplementableEvent)
+    void RestartGame();
+    
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;

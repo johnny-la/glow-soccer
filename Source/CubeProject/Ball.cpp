@@ -88,9 +88,20 @@ void ABall::StartMove(const bool bMoveRight)
 	UpdateVelocity();
 }
 
+void ABall::SetEnabled(const bool bEnabled)
+{
+    // Set the ball's properties based on the given boolean
+    SetActorHiddenInGame(!bEnabled);
+    SetActorEnableCollision(bEnabled);
+    SetActorTickEnabled(bEnabled);
+}
+
 /** Resets the ball at its starting position (0,0) */
 void ABall::Reset()
 {
+    // Enable the ball when it is reset. This way, the ball is rendered on-screen
+    SetEnabled(true);
+    
     // Reset the ball at (0,0), its starting point.
     SetActorLocation(FVector::ZeroVector);
     

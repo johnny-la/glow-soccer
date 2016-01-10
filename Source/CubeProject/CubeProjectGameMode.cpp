@@ -57,6 +57,12 @@ void ACubeProjectGameMode::BeginPlay()
 {
     Super::BeginPlay();
     
+    // If debug mode is off, do not display debug messages.
+    if(GEngine)
+    {
+        GEngine->bEnableOnScreenDebugMessages = bDebugMode;
+    }
+    
     // Sets the player scores to zero
     LeftPlayerScore = RightPlayerScore = 0;
     
@@ -99,6 +105,11 @@ void ACubeProjectGameMode::BeginPlay()
     DefaultPawnClass = Player2PawnClass;
     // Create the second player in the game
     APlayerController* RightPlayerController = UGameplayStatics::CreatePlayer(GetWorld(), 1, true);//UGameplayStatics::GetPlayerController(World, 1);
+    
+    // Enable the mouse cursor for a better user experience
+    LeftPlayerController->bShowMouseCursor = true;
+    LeftPlayerController->bEnableClickEvents = true;
+    LeftPlayerController->bEnableMouseOverEvents = true;
     
     // Store the two player pawns
     ACubePawn* LeftPlayerPawn = NULL;
@@ -291,6 +302,9 @@ void ACubeProjectGameMode::StartGame()
         // Get the level Blueprint controlling the game
         ACubeProjectLevelScriptActor* LevelScript = Cast<ACubeProjectLevelScriptActor>(GetWorld()->GetLevelScriptActor());
     
+        if(GEngine)
+            GEngine->AddOnScreenDebugMessage(-1,4.0f,FColor::White,"HIDE MAIN MENU");
+        
         // Tell the level Blueprint to hide the main menu to start the game.
         LevelScript->HideMainMenu();
         

@@ -22,7 +22,7 @@ public:
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComponent, 
 		bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
-	/** Called when another actor begins to touch the ball. */
+	/** Called when another actor begins	 to touch the ball. */
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	/** Called when the ball spawns. Gives the ball an initial push. If bMoveRight is true, the ball is launched to the right of the field. */

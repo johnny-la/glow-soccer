@@ -60,6 +60,9 @@ public:
      * when the game starts. */
     bool DidRightPlayerScoreLast() const;
     
+    /** If true, debug messages are displayed to the screen. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
+    bool bDebugMode = true;
     /** The default score needed to win the game. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
     int32 DefaultScoreToWin = 3;

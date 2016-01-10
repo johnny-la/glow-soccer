@@ -153,34 +153,35 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
             Direction = BounceDirection;
             // Reset the ball's speed to default once it hits a player
             Speed = DefaultSpeed;
+            
+            // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
+            Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
+            
+            // Play the sound of the ball hitting a player
+            if(GameMode->BallHitPlayerSound)
+            {
+                UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitPlayerSound,GetActorLocation());
+            }
+            
+            // Spawn particles where the ball hit the player.
+            if(GameMode->BallHitPlayerParticles)
+            {
+                UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitPlayerParticles,Other->GetActorLocation());
+            }
+            
+            // Play a camera shake when the ball hits a player
+            if(GameMode->BallHitPlayerCameraShake)
+            {
+                World->GetFirstPlayerController()->ClientPlayCameraShake(GameMode->BallHitPlayerCameraShake,1.0f,ECameraAnimPlaySpace::World,
+                                                                         FRotator::ZeroRotator);
+            }
         
             // Update the last time the ball was hit by an actor
             LastHitTime = World->GetTimeSeconds();
             LastActorHit = Other;
         }
         
-        // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
-        Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
-        
-        // Play the sound of the ball hitting a player
-        if(GameMode->BallHitPlayerSound)
-        {
-            UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitPlayerSound,GetActorLocation());
-        }
-        
-        // Spawn particles where the ball hit the player.
-        if(GameMode->BallHitPlayerParticles)
-        {
-            UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitPlayerParticles,Other->GetActorLocation());
-        }
-        
-        // Play a camera shake when the ball hits a player
-        if(GameMode->BallHitPlayerCameraShake)
-        {
-            World->GetFirstPlayerController()->ClientPlayCameraShake(GameMode->BallHitPlayerCameraShake,1.0f,ECameraAnimPlaySpace::World,
-                                                                     FRotator::ZeroRotator);
-        }
-	}
+    }
 	// Else, if anything other than a player hit the ball
 	else
 	{

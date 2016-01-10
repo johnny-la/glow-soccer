@@ -7,8 +7,8 @@ Glow Soccer is a 2D, pong-like soccer game built in Unreal Engine 4.
 
 ## Controls
 
-              | Player 1      | Player 2
-------------- | ------------- | -------------
+                  | Player 1      | Player 2
+-------------     | ------------- | -------------
 **Move**          | W, A, S, D    | Up, Down, Left, Right
 **Speed Boost**   | L-Shift       | R-Shift
 

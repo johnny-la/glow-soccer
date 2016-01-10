@@ -63,6 +63,11 @@ public:
     /** If true, debug messages are displayed to the screen. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
     bool bDebugMode = true;
+    /** If true, the application is being deployed to a standalone build. If so,
+      * text scaling needs to be adjusted in the level Blueprint due to packaging
+      * glitches. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
+    bool bPackagedBuild = false;
     /** The default score needed to win the game. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameSettings)
     int32 DefaultScoreToWin = 3;

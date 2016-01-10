@@ -82,21 +82,7 @@ void ACubeProjectGameMode::BeginPlay()
         Ball->OnActorBeginOverlap.AddDynamic(this, &ACubeProjectGameMode::OnBallOverlap);
     }
     
-    // If the ScoreTextClass points to a valid Blueprint, spawn the score indicators
-    if(ScoreTextClass)
-    {
-        // Spawn the text actors which display the game score
-        ScoreTextLeft = World->SpawnActor<ATextRenderActor>(ScoreTextClass);
-        ScoreTextRight = World->SpawnActor<ATextRenderActor>(ScoreTextClass);
-        
-        // Place the score texts at the top of the screen.
-        ScoreTextLeft->SetActorLocation(SCORE_TEXT_POSITION * FVector(0,-1,1));
-        ScoreTextRight->SetActorLocation(SCORE_TEXT_POSITION);
-        
-        // Rotate the text so that it faces the camera
-        ScoreTextLeft->SetActorRotation(FRotator(0,-180,0));
-        ScoreTextRight->SetActorRotation(FRotator(0,-180,0));
-    }
+
 
     // Retrieve the player which was spawned automatically by the game
     APlayerController* LeftPlayerController = UGameplayStatics::GetPlayerController(World, 0);
@@ -142,6 +128,23 @@ void ACubeProjectGameMode::BeginPlay()
     // Update the pawns controlled by the first and second players
     Player1Pawn = LeftPlayerPawn;
     Player2Pawn = RightPlayerPawn;
+
+    // If the ScoreTextClass points to a valid Blueprint, spawn the score indicators
+    if(ScoreTextClass)
+    {
+        // Spawn the text actors which display the game score
+        ScoreTextLeft = World->SpawnActor<ATextRenderActor>(ScoreTextClass);
+        ScoreTextRight = World->SpawnActor<ATextRenderActor>(ScoreTextClass);
+        
+        // Place the score texts at the top of the screen.
+        ScoreTextLeft->SetActorLocation(SCORE_TEXT_POSITION * FVector(0,-1,1));
+        ScoreTextRight->SetActorLocation(SCORE_TEXT_POSITION);
+        
+        // Rotate the text so that it faces the camera
+        ScoreTextLeft->SetActorRotation(FRotator(0,-180,0));
+        ScoreTextRight->SetActorRotation(FRotator(0,-180,0));
+    }
+
 }
 
 AActor* ACubeProjectGameMode::ChoosePlayerStart_Implementation(AController* Player)

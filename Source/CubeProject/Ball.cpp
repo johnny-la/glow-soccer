@@ -4,8 +4,6 @@
 #include "Ball.h"
 #include "CubeProjectGameMode.h"
 
-// The amount of time which must elapse for the same actor to hit the ball twice
-const float ABall::MULTIPLE_HIT_COOLDOWN = 1.0f;
 
 // Sets the ball's default properties
 ABall::ABall()
@@ -219,7 +217,7 @@ void ABall::OnHitPlayer(AActor* PlayerHit, FVector HitLocation, FVector HitNorma
         // player's velocity were to affect the ball's velocity, the ball would move in a random direction since the hit normal
         // and the player's velocity are pointing in different directions. Thus, we should ignore the player's velocity and not
         // let it affect the ball's velocity.
-        const bool bIgnorePlayerVelocity = (AngleBetweenBounceAndVelocity_Degrees > AngleToIgnorePlayerVelocity);
+        const bool bIgnorePlayerVelocity = (AngleBetweenBounceAndVelocity_Degrees > ANGLE_TO_IGNORE_PLAYER_VELOCITY);
         
         // If the player's velocity should affect the ball's bounce velocity
         if(!bIgnorePlayerVelocity)

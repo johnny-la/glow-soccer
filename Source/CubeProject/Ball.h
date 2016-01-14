@@ -37,7 +37,13 @@ public:
 
 	/** The amount of time that must pass for the same player to hit the ball twice. If the player could hit the ball multiple times in
 	  * in a short time frame, the physics would be glitchy. */
-	static const float MULTIPLE_HIT_COOLDOWN;
+	static constexpr float MULTIPLE_HIT_COOLDOWN = 1.0f;
+    
+    /** If the angle between the bounce normal and the player velocity is greater than this constant, ignore the player's velocity.
+     * That is, do not let the player's velocity impact the ball's bouncing velocity. In fact, if the bounce direction and the
+     * player velocity were pointing in opposite directions, the ball would move in a random direction if both vectors would
+     * affect the ball's velocity. Thus, we should ignore the player's velocity and only let the hit normal affect the ball's velocity. */
+    static constexpr float ANGLE_TO_IGNORE_PLAYER_VELOCITY = 100;
 
 private:
 	/** Updates the ball's velocity based on the 'Speed' and 'Direction' variables. */
@@ -65,13 +71,6 @@ private:
 	  * will be transferred from the player to the ball. */
 	UPROPERTY(EditAnywhere, Category = BallPhysics)
 	float PlayerSpeedBounceFactor = 0.001f;
-    
-    /** If the angle between the bounce normal and the player velocity is greater than this constant, ignore the player's velocity.
-      * That is, do not let the player's velocity impact the ball's bouncing velocity. In fact, if the bounce direction and the
-      * player velocity were pointing in opposite directions, the ball would move in a random direction if both vectors would
-      * affect the ball's velocity. Thus, we should ignore the player's velocity and only let the hit normal affect the ball's velocity. */
-    UPROPERTY(EditAnywhere, Category = BallPhysics)
-    float AngleToIgnorePlayerVelocity = 100;
 
 	/** The ball's current speed. */
 	float Speed;

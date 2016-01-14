@@ -41,6 +41,7 @@ public:
     void StartGame();
     /** Called when the "Quit Main Menu" timer is complete. This timer is a small delay between the time the user presses
       * ENTER in the main menu and the time the game starts. This allows breathing room before the game starts */
+    UFUNCTION()
     void OnQuitMainMenuTimerComplete();
     
     /** Sets whether or not the players can move their pawns. If true, the users can move their avatars. Called in ACubeProjectGameState.

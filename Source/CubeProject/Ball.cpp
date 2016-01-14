@@ -139,48 +139,8 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
 	// If a cube pawn hit the ball
 	if (Other && Other->IsA(ACubePawn::StaticClass()))
 	{
-        // Stores true if the same actor did not hit the ball twice
-        const bool bDifferentActorHitBall = (LastActorHit != Other);
-        // Stores true if enough time has been passed for the same actor to hit the ball twice
-        const bool bCooldownElapsed = (World->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
-        
-        // If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
-        if (bDifferentActorHitBall || bCooldownElapsed)
-        {
-            // Get the direction from the player's center to the ball's center. This is the direction the ball will bounce
-            FVector BounceDirection = (this->GetActorLocation() - Other->GetActorLocation()).GetSafeNormal();
-            // Make the ball go in the opposite direction it was hit.
-            Direction = BounceDirection;
-            // Reset the ball's speed to default once it hits a player
-            Speed = DefaultSpeed;
-            
-            // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
-            Direction += Other->GetVelocity() * PlayerSpeedBounceFactor;
-            
-            // Play the sound of the ball hitting a player
-            if(GameMode->BallHitPlayerSound)
-            {
-                UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitPlayerSound,GetActorLocation());
-            }
-            
-            // Spawn particles where the ball hit the player.
-            if(GameMode->BallHitPlayerParticles)
-            {
-                UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitPlayerParticles,Other->GetActorLocation());
-            }
-            
-            // Play a camera shake when the ball hits a player
-            if(GameMode->BallHitPlayerCameraShake)
-            {
-                World->GetFirstPlayerController()->ClientPlayCameraShake(GameMode->BallHitPlayerCameraShake,1.0f,ECameraAnimPlaySpace::World,
-                                                                         FRotator::ZeroRotator);
-            }
-        
-            // Update the last time the ball was hit by an actor
-            LastHitTime = World->GetTimeSeconds();
-            LastActorHit = Other;
-        }
-        
+        // Inform the ball that it has hit a player. Bounces the ball in the appropriate direction. 
+        OnHitPlayer(Other,HitLocation,HitNormal);
     }
 	// Else, if anything other than a player hit the ball
 	else
@@ -210,6 +170,8 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
                                                                                     FRotator::ZeroRotator);
         }
 
+        // Update the last actor hit by the ball.
+        LastActorHit = Other;
         
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green, FString::Printf(TEXT("New speed %d"), Speed));
@@ -217,6 +179,79 @@ void ABall::NotifyHit(UPrimitiveComponent* MyComponent, AActor* Other, UPrimitiv
 
 	// Update the ball's velocity based on the 'Speed' and 'Direction' variables.
 	UpdateVelocity();
+}
+
+void ABall::OnHitPlayer(AActor* PlayerHit, FVector HitLocation, FVector HitNormal)
+{
+    // Obtain the world which controls the game
+    UWorld* World = GetWorld();
+    // Retrieve the GameMode instance which stores the game sounds
+    ACubeProjectGameMode* GameMode = World->GetAuthGameMode<ACubeProjectGameMode>();
+    
+    // Stores true if the same actor did not hit the ball twice
+    const bool bDifferentActorHitBall = (LastActorHit != PlayerHit);
+    // Stores true if enough time has been passed for the same actor to hit the ball twice
+    const bool bCooldownElapsed = (World->GetTimeSeconds() - LastHitTime) >= ABall::MULTIPLE_HIT_COOLDOWN;
+    
+    // If a different actor hit the ball, or enough time has elapsed for the same actor to hit the ball twice, bounce the ball off the actor which was hit
+    if (bDifferentActorHitBall || bCooldownElapsed)
+    {
+        // Get the direction from the player's center to the ball's center. This is the direction the ball will bounce
+        FVector BounceDirection = (this->GetActorLocation() - PlayerHit->GetActorLocation()).GetSafeNormal();
+        // Make the ball go in the opposite direction it was hit.
+        Direction = BounceDirection;
+        // Reset the ball's speed to default once it hits a player
+        Speed = DefaultSpeed;
+        
+        // Compute the angle between the direction the ball will bounce and the player's velocity vector.
+        // If these vectors are almost perpendicular, they are contradictory. In fact, the ball will try
+        // to bounce in one direction, but the player's velocity will try to make it move the other way,
+        // making the ball go in an unpredictable direction. Thus, we should simply ignore the player's
+        // velocity and make the ball bounce as if the player wasn't moving.
+        float AngleBetweenBounceAndVelocity_Radians = acosf(FVector::DotProduct(BounceDirection,PlayerHit->GetVelocity().GetSafeNormal()));
+        float AngleBetweenBounceAndVelocity_Degrees = FMath::RadiansToDegrees(AngleBetweenBounceAndVelocity_Radians);
+        
+        if(GEngine)
+            GEngine->AddOnScreenDebugMessage(-1,3.0f,FColor::White,FString::Printf(TEXT("Angle between bounce direction and player velocity: %f"),AngleBetweenBounceAndVelocity_Degrees));
+        
+        // If the angle between the bounce normal and the player velocity is greater than a constant, ignore the player's velocity.
+        // In fact, the bounce direction and the player velocity are practically pointing in different directions. Thus, if the
+        // player's velocity were to affect the ball's velocity, the ball would move in a random direction since the hit normal
+        // and the player's velocity are pointing in different directions. Thus, we should ignore the player's velocity and not
+        // let it affect the ball's velocity.
+        const bool bIgnorePlayerVelocity = (AngleBetweenBounceAndVelocity_Degrees > AngleToIgnorePlayerVelocity);
+        
+        // If the player's velocity should affect the ball's bounce velocity
+        if(!bIgnorePlayerVelocity)
+        {
+            // Add the cube's velocity to the ball's direction. Hence, the ball will bounce in the direction the player is moving
+            Direction += PlayerHit->GetVelocity() * PlayerSpeedBounceFactor;
+        }
+        
+        // Play the sound of the ball hitting a player
+        if(GameMode->BallHitPlayerSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(World,GameMode->BallHitPlayerSound,GetActorLocation());
+        }
+        
+        // Spawn particles where the ball hit the player.
+        if(GameMode->BallHitPlayerParticles)
+        {
+            UGameplayStatics::SpawnEmitterAtLocation(World,GameMode->BallHitPlayerParticles,PlayerHit->GetActorLocation());
+        }
+        
+        // Play a camera shake when the ball hits a player
+        if(GameMode->BallHitPlayerCameraShake)
+        {
+            World->GetFirstPlayerController()->ClientPlayCameraShake(GameMode->BallHitPlayerCameraShake,1.0f,ECameraAnimPlaySpace::World,
+                                                                     FRotator::ZeroRotator);
+        }
+        
+        // Update the last time the ball was hit by an actor
+        LastHitTime = World->GetTimeSeconds();
+        LastActorHit = PlayerHit;
+    }
+
 }
 
 /** Called when another actor begins to touch the ball. This method is only called when a player hits the ball.  */

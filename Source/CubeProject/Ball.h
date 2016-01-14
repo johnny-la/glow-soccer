@@ -22,7 +22,8 @@ public:
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComponent, 
 		bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
-	/** Called when another actor begins	 to touch the ball. */
+	/** Called when another actor begins to touch the ball. */
+    UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	/** Called when the ball spawns. Gives the ball an initial push. If bMoveRight is true, the ball is launched to the right of the field. */
@@ -41,6 +42,9 @@ public:
 private:
 	/** Updates the ball's velocity based on the 'Speed' and 'Direction' variables. */
 	void UpdateVelocity();
+    
+    /** Called when the ball hits a player. Makes the ball bounce in the appropriate direction. */
+    void OnHitPlayer(AActor* PlayerHit, FVector HitLocation, FVector HitNormal);
 
 	/** Static mesh used to display the ball. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Ball", meta = (AllowPrivateAccess = "true"))
@@ -61,6 +65,13 @@ private:
 	  * will be transferred from the player to the ball. */
 	UPROPERTY(EditAnywhere, Category = BallPhysics)
 	float PlayerSpeedBounceFactor = 0.001f;
+    
+    /** If the angle between the bounce normal and the player velocity is greater than this constant, ignore the player's velocity.
+      * That is, do not let the player's velocity impact the ball's bouncing velocity. In fact, if the bounce direction and the
+      * player velocity were pointing in opposite directions, the ball would move in a random direction if both vectors would
+      * affect the ball's velocity. Thus, we should ignore the player's velocity and only let the hit normal affect the ball's velocity. */
+    UPROPERTY(EditAnywhere, Category = BallPhysics)
+    float AngleToIgnorePlayerVelocity = 100;
 
 	/** The ball's current speed. */
 	float Speed;

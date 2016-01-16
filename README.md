@@ -35,4 +35,4 @@ Plug in an Xbox controller and control the blue player using the **left analog s
 Glow Soccer utilizes C++ for most of its gameplay programming, allowing me to learn C++ whilst creating the game.
 
 ## Credits
-Music: *Sandor - Free For All*
+Music: *[Sandor - Free For All](https://soundcloud.com/imsandor/free-for-all)*

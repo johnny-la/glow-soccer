@@ -12,10 +12,10 @@ Glow Soccer is a 2D, pong-like soccer game built in Unreal Engine 4.
 
 ## Controls
 
-                  | Player 1      | Player 2
--------------     | ------------- | -------------
-**Move**          | W, A, S, D    | Up, Down, Left, Right
-**Speed Boost**   | L-Shift       | R-Shift
+                  | Player 1                                          | Player 2
+-------------     |:-------------------------------------------------:|:-------------:
+**Move**          | <kbd>W</kbd><kbd>A</kbd> <kbd>S</kbd><kbd>D</kbd> | <kbd>&#8593;</kbd><kbd>&#8595;</kbd> <kbd>&#8592;</kbd><kbd>&#8594;</kbd>
+**Speed Boost**   | <kbd>L-Shift</kbd>                                | <kbd>R-Shift</kbd>
 
 ![cubeproject 2016-01-10 16-35-25-88](https://cloud.githubusercontent.com/assets/10332234/12224336/ca9dc9a0-b7bb-11e5-867c-666930cfb1e0.jpg)
 
@@ -30,7 +30,7 @@ Glow Soccer is a 2D, pong-like soccer game built in Unreal Engine 4.
 
 ## Controller Support
 
-Plug in an Xbox controller and control the blue player using the **left analog stick** to *move* and the **A button** to *spin*.
+Plug in an Xbox controller and control the blue player using the **left analog stick** to *move* and the <kbd>A</kbd> **button** to *speed boost*.
 
 ## Powered by C++
 Glow Soccer utilizes C++ for most of its gameplay programming, allowing me to learn C++ whilst creating the game.

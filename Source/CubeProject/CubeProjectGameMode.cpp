@@ -12,7 +12,6 @@
 /** The position in which the score text is displayed. (This is the position of the score on the right-hand side) */
 const FVector ACubeProjectGameMode::SCORE_TEXT_POSITION = FVector(0.0f,100.0f,252.0f);
 
-// Initializes the default properties for the game mode
 ACubeProjectGameMode::ACubeProjectGameMode()
 {
     // Sets the Blueprint pawn that will be spawned for player 1
@@ -69,20 +68,15 @@ void ACubeProjectGameMode::BeginPlay()
     // Set the score to win to default
     ScoreToWin = DefaultScoreToWin;
     
-    // Retrieve the UWorld instance
     UWorld* World = GetWorld();
     
     // If BallClass points to a valid Blueprint, spawn this Blueprint
     if(BallClass)
     {
-        // Spawn the ball in the world.
         Ball = World->SpawnActor<ABall>(BallClass);
-        
-        // Call the OnBallOverlap() function when the ball overlaps another actor. Used to determine when the ball hits a goal
         Ball->OnActorBeginOverlap.AddDynamic(this, &ACubeProjectGameMode::OnBallOverlap);
     }
     
-    // If the ScoreTextClass points to a valid Blueprint, spawn the score indicators
     if(ScoreTextClass)
     {
         // Spawn the text actors which display the game score
@@ -226,9 +220,7 @@ void ACubeProjectGameMode::OnGoal(bool bRightPlayerScored)
         LeftPlayerScore++;
     }
     
-    // Retrieve the UWorld instance controlling the game
     UWorld* World = GetWorld();
-    // Retrieve the object controlling the game's state
     ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
 
     // Retrieve the GameState instance controlling the game's state.
@@ -331,15 +323,11 @@ void ACubeProjectGameMode::RestartGame()
     // Reload the game level
     //UGameplayStatics::OpenLevel(GetWorld(),TwoPlayerGameMapName);
     
-    // Retrieve the object controlling the game's state
     ACubeProjectGameState* GameState = GetGameState<ACubeProjectGameState>();
-    // Tell the GameState instance to reset the field
     GameState->SetState(EGameState::RESET);
     
-    // Reset the field and the score.
     LeftPlayerScore = RightPlayerScore = 0;
     
-    // Obtain the level Blueprint used to play Matinee animations
     ACubeProjectLevelScriptActor* LevelScript = Cast<ACubeProjectLevelScriptActor>(GetWorld()->GetLevelScriptActor());
     if(LevelScript)
     {

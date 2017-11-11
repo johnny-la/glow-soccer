@@ -8,7 +8,7 @@
 UCLASS()
 class CUBEPROJECT_API UCubePawnMovementComponent : public UFloatingPawnMovement
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };
 
 
